@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="../static/css/materialize.min.css"  media="screen,projection"/>
+      <title>TODO LIST</title>
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+      <style>
+
+        /*body, html{
+            height: 100%;
+        }*/
+        header, main{
+            padding-left: 300px;
+        }
+
+        #ham{
+            display: none;
+        }
+
+        html {
+            background: url("../static/images/messi.jpg") no-repeat center fixed; 
+            background-size: cover;
+        }
+
+        @media only screen and (max-width : 992px) {
+
+            /*body, html{
+                height: 100%;
+            }*/
+            header, main {
+                padding-left: 0;
+            }
+
+            #ham{
+                display: inline;
+            }
+
+            
+        }
+        @media only screen and (max-width : 480px){
+            html {
+                background: url("../static/images/cr72.jpg") no-repeat center fixed; 
+                background-size: cover;
+            }
+        }
+      </style>
+    </head>
+
+    <body>
+       <header>
+            <nav style="background-color: rgb(0,122,255)">
+                <div class="nav-wrapper">
+                    <a href="#" data-activates="slide-out" class="button-collapse" id="ham"><img src="../static/images/menu.png" alt="menu" style="margin-top: 15px;"></a>
+                    <a href="#" class="brand-logo center" id="logo" style="font-size: 1.5em; font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;">{{user_name}}</a>
+                    <a href="{{url_for('logout')}}" class="right" style="display: inline-block; margin-right: 10px;">Log out</a>
+                </div>
+            </nav>
+       </header>
+
+       <main>
+            <ul id="slide-out" class="side-nav fixed" style="text-align: center;">
+                <li style="background: rgb(0,122,255); color: white;">TODO LIST</li>
+                <li style="margin-top: 5px;"><a class="subheader">My Tasks</a></li>
+                <li id="list" style="background: silver; margin-top: 5px;"><a class="waves-effect" id = "task_link" href="#!">Tasks<p id="count" style="float: right; margin-right: 5px; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; background: rgb(0,122,255); color: white; margin-top:4px; ">{{task_count}}</p></a></li>
+                <li id="c_list" style="margin-top: 5px;"><a class="waves-effect" id = "c_task_link" href="#!">Completed Tasks<p id="c_count" style="float: right; margin-right: 5px; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; background: rgb(0,122,255); color: white; margin-top:4px; ">{{c_task_count}}</p></a></li>
+            </ul>
+
+           <div class="row">
+               <div class="card-panel col s11" style="background: rgba(255,255,255,0.5);margin-left: 5px; height: fit-content; max-width: 400px; padding: 5px;">
+                    <form action="/" method="POST" style="padding: 0;">
+                        <div class="row" style="margin: 0;" >
+                            <div class="input-field col s12" style="margin: 0; height: 50px;">
+                              <input id="search" type="text" name="new-task" style="color: black;" />
+                            </div>
+                        </div>
+
+                        <p style="text-align: center; margin: 0;"><button type="submit" id="add-task"
+                            style="display: inline-block; text-decoration: none; width: 70px; color: 
+                            white; background-color: rgb(0,122,255); height: 30px; line-height: 30px;border: none;">ADD</button>
+                          </p>
+
+                    </form>
+                </div>
+           </div>
+
+        <div class="tasks">
+            {% for task in tasks %}
+           <div class="row task" style="margin: 0;">
+
+                <div class="card-panel col s11 l8" style="background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid {{colors[(tasks.index(task))%6]}}; padding-bottom: 10px;">
+                    <a href="#" style="float: right;" class="remove"><img src="../static/images/close.png" alt="remove"></a>
+                    <form action="#">
+                        <p>
+                        <input type="checkbox" id="{{ task.id }}"/>
+                        <label for="{{ task.id }}" style="color: black;">{{ task.todo }}</label>
+                        </p>
+                    </form>
+                </div>
+            </div>
+           {% endfor %}
+        </div>
+        <div class="completed-tasks" style="display: none;">
+            {% for task in c_tasks %}
+           <div class="row task" style="margin: 0;">
+
+                <div class="card-panel col s11 l8" style="background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid {{colors[(c_tasks.index(task))%6]}}; padding-bottom: 10px;">
+                    <a href="#" style="float: right;" class="remove"><img src="../static/images/close.png" alt="remove"></a>
+                    <form action="#">
+                        <p>
+                        <input type="checkbox" checked="checked" id="{{ task.id }}"/>
+                        <label for="{{ task.id }}" style="color: black; text-decoration: line-through;">{{ task.todo }}</label>
+                        </p>
+                    </form>
+                </div>
+            </div>
+           {% endfor %}
+        </div>
+       </main>
+
+       <script type="text/javascript" src="../static/js/jquery-3.2.1.min.js"></script>
+       <script type="text/javascript" src="../static/js/materialize.min.js"></script>
+       <script type="text/javascript" src="../static/js/underscore-min.js"></script>
+       <script>
+           $('.button-collapse').sideNav({
+                closeOnClick: true
+            });
+            $(function() {
+			  $('#add-task').bind('click', function(event) {
+                  event.preventDefault();
+                  var task = $('input[name="new-task"]').val();
+                  $('input[name="new-task"]').val("");
+                  task = $.trim(task);
+                  if (task){
+                      var id = _.uniqueId('task_');
+                      console.log(id);
+                      edited_task = _.escape(task)
+                $.getJSON('/get_color', {}, function(data) {
+                    var colorx = data.color
+                    switch(colorx) {
+                        case 'silver':
+                             $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid silver;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + edited_task + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                            break;
+
+                        case 'red':
+                            $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid red;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + edited_task + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                            break;
+
+                        case 'yellow':
+                            $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid yellow;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + edited_task + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                            break;
+
+                        case 'purple':
+                            $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid purple; padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + edited_task + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                            break;
+
+                        case 'blue':
+                            $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid blue;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + edited_task + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                            break;
+
+                        case 'green':
+                            $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid green;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + edited_task + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                            break;
+
+                        default:
+                            $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid red;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + edited_task + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                    }
+
+               $.getJSON('/add_task', {
+				  description: task,
+				}, function(data) {
+                    $('#count').text(data.count)
+                    
+                    
+                });
+				});
+                }return false;
+			  });
+
+              $('.tasks').on( "click", ".row .card-panel a",  function(event) {
+                  event.preventDefault(); 
+                  var msg = $(this).parent().parent().css('display', 'none').find('label').text();
+                  $.getJSON('/delete_task', {
+				  description: msg,
+				}, function(data) {
+                    $('#count').text(data.count)
+                    $('#c_count').text(data.c_task_count)
+                    
+                    
+                }
+                );
+                
+              });
+
+              $('.completed-tasks').on( "click", ".row .card-panel a",  function(event) {
+                  event.preventDefault(); 
+                  var msg = $(this).parent().parent().css('display', 'none').find('label').text();
+                  $.getJSON('/delete_task', {
+				  description: msg,
+				}, function(data) {
+                    $('#c_count').text(data.c_task_count)
+                    }
+                );
+                
+              });
+
+              $('.tasks').on( "click", ".row .card-panel form input",  function(event) {
+                    var id = $(this).attr('id')
+                    $('.completed-tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid silver;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' checked='checked' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black; text-decoration: line-through;'>" + $(this).parent().find('label').text() + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                    // $('.completed-tasks').append($(this).parent().parent().parent());
+                    var msg = $(this).parent().parent().parent().find('label').text();
+                    $(this).parent().parent().parent().css('display', 'none')
+                    var ruckus_id = _.uniqueId('ruckus_')
+                    $(this).attr('id', ruckus_id);
+                    
+                    $.getJSON('/complete_task', {
+                      description: msg,},
+                      function(data) {
+                        $('#count').text(data.count)
+                        $('#c_count').text(data.c_task_count)
+                        
+                        
+                        }
+                    );
+                
+            });
+
+            $('.completed-tasks').on( "click", ".row .card-panel form input",  function(event) {
+                    var id = $(this).attr('id')
+                    $('.tasks').prepend("" +
+                            "<div class='row task' style='margin: 0;'>" +
+                                "<div class='card-panel col s11 l8' style='background: rgba(255,255,255,0.5); border-radius: 0; margin-left: 5px; height: fit-content; min-height: 60px; border-left: 4px solid silver;padding-bottom: 10px;'>" +
+                                    "<a href='#' style='float: right; class='remove'><img src='../static/images/close.png' alt='remove'></a>" +
+                                    "<form action='#'>" +
+                                        "<p>" +
+                                        "<input type='checkbox' id='" +  id  + "'/>" +
+                                        "<label for='" + id + "' style='color: black;'>" + $(this).parent().find('label').text() + "</label>" +
+                                    " </p>" +
+                                    "</form>" +
+                                "</div>" +
+                        "</div>");
+                    // $('.tasks').prepend($(this).parent().parent().parent());
+                    var msg = $(this).parent().parent().parent().find('label').text();
+                    $(this).parent().parent().parent().css('display', 'none')
+                    var ruckus_id = _.uniqueId('ruckus_')
+                    $(this).attr('id', ruckus_id);
+                                                            
+                    
+                    $.getJSON('/undo', {
+                      description: msg,},
+                      function(data) {
+                        $('#c_count').text(data.c_task_count)
+                        $('#count').text(data.count)
+                        
+                        
+                        }
+                    );
+                
+            });
+
+             $('#c_task_link').bind('click', function(event) {
+                //  window.location.reload()
+                 $('.tasks').css('display', 'none');
+                 $('.completed-tasks').css('display', '');
+                 $('#list').css('background', '');
+                 $('#c_list').css('background', 'silver');
+             });
+
+             $('#task_link').bind('click', function(event) {
+                //  window.location.reload()
+                 $('.completed-tasks').css('display', 'none');
+                 $('.tasks').css('display', '');
+                 $('#c_list').css('background', '');
+                 $('#list').css('background', 'silver');
+             });
+
+              
+			});
+
+       </script>
+    </body>
+  </html>
